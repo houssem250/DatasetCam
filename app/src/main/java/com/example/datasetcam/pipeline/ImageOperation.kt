@@ -10,6 +10,8 @@ interface ImageOperation {
     /** Human-readable name for UI display */
     val name: String
 
-    /** Apply transformation to the input bitmap, return new bitmap */
-    fun apply(bitmap: Bitmap): Bitmap
+    /** Apply transformation to the input bitmap, return new bitmap. 
+     *  Metadata can be passed through the pipeline (e.g. for saving). 
+     */
+    fun apply(bitmap: Bitmap, metadata: Map<String, Any>? = null): Bitmap
 }

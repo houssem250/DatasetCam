@@ -1,30 +1,88 @@
 package com.example.datasetcam.sensor
 
 import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.Build
+import java.time.Instant
+import java.time.format.DateTimeFormatter
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 /**
- * Reads accelerometer, gyroscope, light sensors in real-time.
+ * Manages real-time sensor readings (accelerometer, magnet, light).
  */
-class SensorCollector(private val context: Context) {
+class SensorCollector(context: Context) : SensorEventListener {
 
-    /** Start listening to sensors */
+    private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+    
+    // Sensor data
+    private var gravity = FloatArray(3)
+    private var geomagnetic = FloatArray(3)
+    private var lightValue = 0f
+    
+    // Orientation
+    var pitch = 0f
+    var roll = 0f
+    
     fun start() {
-        // TODO: get SensorManager system service
-        // TODO: register listeners for TYPE_ACCELEROMETER, TYPE_GYROSCOPE, TYPE_LIGHT
-        // TODO: compute pitch/roll from accelerometer using atan2
-        // TODO: determine gyroStable from gyroscope magnitude threshold
+        val accel = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        val magnet = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+        val light = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)
+        
+        accel?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
+        magnet?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
+        light?.let { sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_UI) }
     }
 
-    /** Stop listening */
     fun stop() {
-        // TODO: unregister all sensor listeners
+        sensorManager.unregisterListener(this)
     }
 
-    /** Get current sensor snapshot */
-    fun capture(): SensorMetadata? {
-        // TODO: return SensorMetadata with latest values + Build.MODEL + ISO timestamp
-        return null
+    override fun onSensorChanged(event: SensorEvent) {
+        when (event.sensor.type) {
+            Sensor.TYPE_ACCELEROMETER -> gravity = event.values.clone()
+            Sensor.TYPE_MAGNETIC_FIELD -> geomagnetic = event.values.clone()
+            Sensor.TYPE_LIGHT -> lightValue = event.values[0]
+        }
+        
+        calculateOrientation()
     }
 
-    // TODO: add Flow / LiveData properties to publish live values to UI
+    private fun calculateOrientation() {
+        val r = FloatArray(9)
+        val i = FloatArray(9)
+        if (SensorManager.getRotationMatrix(r, i, gravity, geomagnetic)) {
+            val orientation = FloatArray(3)
+            SensorManager.getOrientation(r, orientation)
+            
+            // Convert to degrees
+            // pitch: rotation around X axis (-180 to 180)
+            // roll: rotation around Y axis (-90 to 90)
+            pitch = Math.toDegrees(orientation[1].toDouble()).toFloat()
+            roll = Math.toDegrees(orientation[2].toDouble()).toFloat()
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+
+    /** Capture a snapshot of current sensor states */
+    fun getSnapshot(): SensorMetadata {
+        return SensorMetadata(
+            pitch = pitch,
+            roll = roll,
+            lightLux = lightValue,
+            gyroStable = isSteady(),
+            device = Build.MODEL,
+            timestamp = DateTimeFormatter.ISO_INSTANT.format(Instant.now())
+        )
+    }
+
+    private fun isSteady(): Boolean {
+        // Simple heuristic: if gravity vector is close to 9.8 and not changing much
+        val g = sqrt(gravity[0]*gravity[0] + gravity[1]*gravity[1] + gravity[2]*gravity[2])
+        return g > 9.0 && g < 10.5
+    }
 }

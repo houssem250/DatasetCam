@@ -12,7 +12,7 @@ class CropOperation(
 ) : ImageOperation {
     override val name = "Crop (${cropWidth}x${cropHeight})"
 
-    override fun apply(bitmap: Bitmap): Bitmap {
+    override fun apply(bitmap: Bitmap, metadata: Map<String, Any>?): Bitmap {
         // Ensure bounds are safe
         val safeX = kotlin.math.max(0, x)
         val safeY = kotlin.math.max(0, y)

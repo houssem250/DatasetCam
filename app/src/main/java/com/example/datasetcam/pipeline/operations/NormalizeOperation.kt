@@ -11,7 +11,7 @@ import com.example.datasetcam.pipeline.ImageOperation
 class NormalizeOperation : ImageOperation {
     override val name = "Normalize"
 
-    override fun apply(bitmap: Bitmap): Bitmap {
+    override fun apply(bitmap: Bitmap, metadata: Map<String, Any>?): Bitmap {
         // Overview: read all pixels, find min/max, scale to 0-255 range
 
         val width = bitmap.width

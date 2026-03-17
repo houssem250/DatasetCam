@@ -10,7 +10,7 @@ import com.example.datasetcam.pipeline.ImageOperation
 class RotateOperation(private val degrees: Float) : ImageOperation {
     override val name = "Rotate (${degrees}°)"
 
-    override fun apply(bitmap: Bitmap): Bitmap {
+    override fun apply(bitmap: Bitmap, metadata: Map<String, Any>?): Bitmap {
         // Overview: use Matrix.postRotate, Bitmap.createBitmap with matrix
 
         val matrix = Matrix()

@@ -16,7 +16,8 @@ import com.example.datasetcam.pipeline.ImageOperation
 class BlurOperation(private val context: Context, private val radius: Float) : ImageOperation {
     override val name = "Blur (r=$radius)"
 
-    override fun apply(bitmap: Bitmap): Bitmap {
+    override fun apply(bitmap: Bitmap, metadata: Map<String, Any>?): Bitmap {
+        val outBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, bitmap.config)
         // Overview: use RenderScript or StackBlur algorithm for Gaussian blur
 
         // RenderScript requires ARGB_8888

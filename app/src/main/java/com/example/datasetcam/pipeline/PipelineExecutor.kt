@@ -14,11 +14,20 @@ class PipelineExecutor {
      * - Return final transformed bitmap
      * - Recycle intermediate bitmaps to avoid memory leaks
      */
-    fun execute(bitmap: Bitmap, operations: List<ImageOperation>): Bitmap {
+    fun execute(
+        bitmap: Bitmap, 
+        operations: List<ImageOperation>, 
+        metadata: Map<String, Any>? = null
+    ): Bitmap {
         var currentBitmap = bitmap
         for (operation in operations) {
-            val nextBitmap = operation.apply(currentBitmap)
-            // TODO: recycle currentBitmap if it's different from nextBitmap to avoid OOM
+            val nextBitmap = operation.apply(currentBitmap, metadata)
+            
+            // Recycle intermediate bitmap if it was newly created by the operation
+            if (currentBitmap !== bitmap && currentBitmap !== nextBitmap && !currentBitmap.isRecycled) {
+                currentBitmap.recycle()
+            }
+            
             currentBitmap = nextBitmap
         }
         return currentBitmap

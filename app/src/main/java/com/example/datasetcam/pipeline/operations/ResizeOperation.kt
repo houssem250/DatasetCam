@@ -9,7 +9,7 @@ import com.example.datasetcam.pipeline.ImageOperation
 class ResizeOperation(private val width: Int, private val height: Int) : ImageOperation {
     override val name = "Resize (${width}x${height})"
 
-    override fun apply(bitmap: Bitmap): Bitmap {
+    override fun apply(bitmap: Bitmap, metadata: Map<String, Any>?): Bitmap {
         return Bitmap.createScaledBitmap(bitmap, width, height, true)
     }
 }

@@ -13,7 +13,7 @@ import kotlin.math.abs
 class EdgeDetectionOperation : ImageOperation {
     override val name = "Edge Detection"
 
-    override fun apply(bitmap: Bitmap): Bitmap {
+    override fun apply(bitmap: Bitmap, metadata: Map<String, Any>?): Bitmap {
         // Overview: convert to grayscale, apply Sobel/Canny convolution kernel
         
         val width = bitmap.width

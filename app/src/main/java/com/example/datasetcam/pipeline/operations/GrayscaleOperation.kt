@@ -13,7 +13,7 @@ import com.example.datasetcam.pipeline.ImageOperation
 class GrayscaleOperation : ImageOperation {
     override val name = "Grayscale"
 
-    override fun apply(bitmap: Bitmap): Bitmap {
+    override fun apply(bitmap: Bitmap, metadata: Map<String, Any>?): Bitmap {
         // Overview: use ColorMatrix with saturation=0, apply via Canvas + Paint
         
         val grayscaleBitmap = Bitmap.createBitmap(
